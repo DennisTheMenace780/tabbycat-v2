@@ -2,17 +2,13 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 )
 
 type Model struct {
 	list     list.Model
-	repo     *git.Repository
 	choice   string
 	quitting bool
 }
@@ -22,10 +18,10 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	w, err := m.repo.Worktree()
-	if err != nil {
-		log.Print(err)
-	}
+	// w, err := m.repo.Worktree()
+	// if err != nil {
+	// 	log.Print(err)
+	// }
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -43,18 +39,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				m.choice = string(i)
 
-				refName := plumbing.NewBranchReferenceName(m.choice)
-				opts := git.CheckoutOptions{
-					Branch: refName,
-					Create: false,
-					Force:  false,
-                    Keep: false,
-				}
+				// refName := plumbing.NewBranchReferenceName(m.choice)
+				// opts := git.CheckoutOptions{
+				// 	Branch: refName,
+				// 	Create: false,
+				// 	Force:  false,
+    //                 Keep: false,
+				// }
 
-				e := w.Checkout(&opts)
-				if e != nil {
-                    log.Print("Checkout error: ", e)
-				}
+				// e := w.Checkout(&opts)
+				// if e != nil {
+    //                 log.Print("Checkout error: ", e)
+				// }
 			}
 			return m, tea.Quit
 		}
