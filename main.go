@@ -4,12 +4,21 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
+	if len(os.Getenv("DEBUG")) > 0 {
+		f, err := tea.LogToFile("debug.log", "debug")
+		if err != nil {
+			fmt.Println("fatal:", err)
+			os.Exit(1)
+		}
+		defer f.Close()
+	}
 	cmd := exec.Command("git", "branch")
 	// Get a pipe to read from standard out
 	r, _ := cmd.StdoutPipe()
@@ -31,18 +40,24 @@ func main() {
 		done <- struct{}{}
 	}()
 	// Start the command and check for errors
-	cmd.Start()
+	err := cmd.Start()
+	if err != nil {
+		log.Print("Error", err)
+	}
 
 	// Wait for all output to be processed
 	<-done
-	// Wait for the command to finish
-	fmt.Println(branches)
 
 	branchItems := BuildItems(branches)
 	l := ListBuilder(branchItems)
 
+	err = cmd.Wait()
+	if err != nil {
+		log.Print("Error", err)
+	}
+
 	if _, err := tea.NewProgram(Model{list: l}).Run(); err != nil {
 		log.Fatal(err)
 	}
-	cmd.Wait()
+	// Wait for the command to finish
 }

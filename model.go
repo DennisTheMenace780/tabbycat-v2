@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os/exec"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -10,6 +13,7 @@ import (
 type Model struct {
 	list     list.Model
 	choice   string
+	err      string
 	quitting bool
 }
 
@@ -17,12 +21,12 @@ func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// w, err := m.repo.Worktree()
-	// if err != nil {
-	// 	log.Print(err)
-	// }
+func processBranchString(s string) string {
+	str := strings.TrimLeft(s, "*")
+	return strings.TrimSpace(str)
+}
 
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
@@ -37,20 +41,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			i, ok := m.list.SelectedItem().(Item)
 			if ok {
-				m.choice = string(i)
+				m.choice = processBranchString(string(i))
 
-				// refName := plumbing.NewBranchReferenceName(m.choice)
-				// opts := git.CheckoutOptions{
-				// 	Branch: refName,
-				// 	Create: false,
-				// 	Force:  false,
-    //                 Keep: false,
-				// }
-
-				// e := w.Checkout(&opts)
-				// if e != nil {
-    //                 log.Print("Checkout error: ", e)
-				// }
+				out, err := exec.Command("git", "checkout", "some-branch-1").CombinedOutput()
+				if err != nil {
+					log.Print("TEST", err)
+				}
+				log.Printf("Output: \n%s", out)
+                m.err = string(out)
 			}
 			return m, tea.Quit
 		}
@@ -63,6 +61,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
+    if m.err != "" {
+        return QuitCheckoutStyle.Render(m.err)
+    }
 	if m.choice != "" {
 		return QuitTextStyle.Render(fmt.Sprintf("switched to branch '%s'", m.choice))
 	}

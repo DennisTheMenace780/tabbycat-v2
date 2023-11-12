@@ -1,0 +1,7 @@
+debug 2023/11/12 12:14:45 TESTexit status 1
+debug 2023/11/12 12:14:45 Output: 
+error: Your local changes to the following files would be overwritten by checkout:
+	main.go
+	model.go
+Please commit your changes or stash them before you switch branches.
+Aborting
