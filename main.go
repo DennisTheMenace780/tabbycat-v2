@@ -10,7 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func main() {
+func init() {
 	if len(os.Getenv("DEBUG")) > 0 {
 		f, err := tea.LogToFile("debug.log", "debug")
 		if err != nil {
@@ -19,6 +19,9 @@ func main() {
 		}
 		defer f.Close()
 	}
+}
+
+func main() {
 	cmd := exec.Command("git", "branch")
 	// Get a pipe to read from standard out
 	r, _ := cmd.StdoutPipe()
@@ -59,5 +62,4 @@ func main() {
 	if _, err := tea.NewProgram(Model{list: l}).Run(); err != nil {
 		log.Fatal(err)
 	}
-	// Wait for the command to finish
 }
